@@ -31,4 +31,16 @@ public class ProductService {
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
+
+    public Product buyProduct(Long id, Long amt) {
+        Product product = getProductById(id).orElseThrow(
+            () -> new RuntimeException("Product not found")
+        );
+        if(product.getQuantity() < amt) {
+            throw new RuntimeException("Insufficient quantity");
+        }
+        product.setQuantity(product.getQuantity() - amt);
+        productRepository.save(product);
+        return product;
+    }
 }

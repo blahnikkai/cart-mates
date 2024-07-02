@@ -25,10 +25,7 @@ public class ProductController {
     // get all products
     @GetMapping
     public ResponseEntity<List<Product>> getProductData() {
-        return new ResponseEntity<>(
-            productService.getAllProducts(),
-            HttpStatusCode.valueOf(200)
-        );
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     // get product by id
@@ -45,29 +42,30 @@ public class ProductController {
 
     // replace an existing product
     @PutMapping("/{id}")
-    public ResponseEntity<Product> replaceProduct(@PathVariable Long id, @RequestBody Product newProduct) {
+    public ResponseEntity<Void> replaceProduct(@PathVariable Long id, @RequestBody Product newProduct) {
         Optional<Product> optionalProduct = productService.getProductById(id);
-        if(optionalProduct.isPresent()) {
-            productService.replaceProduct(id, newProduct);
-            return ResponseEntity.ok().build();
-        }
-        else {
+        if(optionalProduct.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        productService.replaceProduct(id, newProduct);
+        return ResponseEntity.ok().build();
     }
 
     // delete by id
     @DeleteMapping("/{id}")
-    public ResponseEntity<Product> deleteProductById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProductById(@PathVariable Long id) {
         Optional<Product> optionalProduct = productService.getProductById(id);
-        if(optionalProduct.isPresent()) {
-            productService.deleteProduct(id);
-            return ResponseEntity.ok().build();
-        }
-        else {
+        if(optionalProduct.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        productService.deleteProduct(id);
+        return ResponseEntity.ok().build();
     }
 
-
+    // subtract amount from product quantity
+    @PatchMapping("/buy/{id}")
+    public ResponseEntity<Product> subtractFromProduct(@PathVariable Long id, @RequestBody Long amt) {
+        Product updatedProduct = productService.buyProduct(id, amt);
+        return ResponseEntity.ok(updatedProduct);
+    }
 }
